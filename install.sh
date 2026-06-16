@@ -37,6 +37,7 @@ tunnelforge|tunnelforge|expose a local port to the internet in one command|tools
 deadman|deadman|monitor services + heartbeats, alert on Telegram when they die|tools/deadmanswitch.sh
 secrets-doctor|secrets-doctor|find leaked secrets locally before they ship|tools/secrets-doctor.sh
 fr|fr|francophone dev assistant in your terminal (AI)|tools/fr.sh
+oneshot|oneshot|turn a fresh VPS into an app host in one command|tools/oneshot.sh
 "
 
 tool_field() { # id field-index  -> prints the field

@@ -44,7 +44,8 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **deadman** | Monitors services (http/tcp/command) and heartbeats; pings you on **Telegram** when something dies or recovers. | Personal uptime + dead-man's switch in one command. Alerts only on **state changes** — no spam. |
 | **secrets-doctor** | Scans files for leaked API keys, tokens and private keys; gates commits via a pre-commit hook. | **100% local — nothing is uploaded.** Redacts findings, exits non-zero so it works in CI and hooks. |
 | **fr** | Ask any dev question in French; get a concise answer tuned for the francophone / West-African context. | A terminal assistant in **your** language — stop translating questions into English first. |
-| _more coming_ | oneshot-vps, landrop-ai… | Each one solves an acute pain in one command. |
+| **oneshot** | Turns a fresh VPS into an app host: Docker + a Caddy auto-HTTPS reverse proxy + one-line app deploys. | Bring a domain, get a live HTTPS site. `--dry` previews every step. |
+| _more coming_ | landrop-ai… | Each one solves an acute pain in one command. |
 
 ### peek — make `curl | sh` safe
 
@@ -162,6 +163,20 @@ fr --dry "..."                                       # show the request, no API 
 
 Set `OPENROUTER_API_KEY`. Answers come back in French, concise, with concrete
 commands/code, tuned for limited-bandwidth contexts. Override the model with `FR_MODEL`.
+
+### oneshot — fresh VPS to live host
+
+```sh
+oneshot init                                   # install docker + firewall
+oneshot host --email you@example.com           # auto-HTTPS reverse proxy
+oneshot add blog --image ghcr.io/you/blog --port 3000 --domain blog.example.com
+oneshot status | logs <name> | rm <name>
+```
+
+Routing and TLS are automatic: apps run on the `oneshot` network with `caddy`
+labels, and [caddy-docker-proxy](https://github.com/lucaslorentz/caddy-docker-proxy)
+fetches Let's Encrypt certs for each domain once DNS points at the server. Add
+`--dry` to any command to preview without changing anything. `init`/`host` need root.
 
 ## 🧠 Why a hub
 
