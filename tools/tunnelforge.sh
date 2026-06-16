@@ -29,7 +29,8 @@ warn() { printf '%swarn%s %s\n' "$YE" "$R" "$*" >&2; }
 die()  { printf 'tunnelforge: %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
-have cloudflared || die "cloudflared not found — install it: https://developers.cloudflare.com/cloudflared/"
+# checked only when actually opening/managing a tunnel, so --version/--help work anywhere
+need_cf() { have cloudflared || die "cloudflared not found — install it: https://developers.cloudflare.com/cloudflared/"; }
 
 # turn "3000" into http://localhost:3000 ; pass full URLs through unchanged
 as_target() {
@@ -55,6 +56,7 @@ big_url() {
 
 # ----- QUICK MODE ------------------------------------------------------------
 cmd_quick() {
+  need_cf
   target="$(as_target "$1")"
   case "$1" in *[!0-9]*) : ;; *) check_listening "$1" ;; esac
   log="$(mktemp)"
@@ -82,6 +84,7 @@ cmd_quick() {
 
 # ----- NAMED MODE ------------------------------------------------------------
 cmd_named() {
+  need_cf
   port_or_url="$1"; sub="$2"; dry="${3:-}"
   target="$(as_target "$port_or_url")"
   host="${sub}.${DOMAIN}"
@@ -121,11 +124,13 @@ cmd_named() {
 }
 
 cmd_list() {
+  need_cf
   info "your named tunnels (tf-*)"
   cloudflared tunnel list 2>/dev/null | awk 'NR==1 || $2 ~ /^tf-/'
 }
 
 cmd_rm() {
+  need_cf
   sub="${1:-}"; [ -n "$sub" ] || die "usage: tunnelforge rm <subdomain>"
   name="tf-${sub}"
   info "deleting tunnel ${name}"

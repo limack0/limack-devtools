@@ -6,6 +6,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/limack0/limack-devtools/actions/workflows/ci.yml"><img src="https://github.com/limack0/limack-devtools/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/shellcheck-clean-brightgreen" alt="shellcheck clean">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
+</p>
+
+<p align="center">
   <a href="#-quick-start">Quick start</a> ·
   <a href="#-the-tools">Tools</a> ·
   <a href="#-why-a-hub">Why a hub</a> ·
