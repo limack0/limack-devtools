@@ -20,9 +20,9 @@ DIR="${LITEMIRROR_DIR:-$HOME/.litemirror}"
 PORT="${LITEMIRROR_PORT:-8919}"
 
 if [ -t 1 ]; then
-  R="$(printf '\033[0m')"; D="$(printf '\033[2m')"; B="$(printf '\033[1m')"
+  R="$(printf '\033[0m')"; B="$(printf '\033[1m')"
   CY="$(printf '\033[36m')"; GR="$(printf '\033[32m')"; YE="$(printf '\033[33m')"
-else R=""; D=""; B=""; CY=""; GR=""; YE=""; fi
+else R=""; B=""; CY=""; GR=""; YE=""; fi
 info() { printf '%s==>%s %s\n' "$CY" "$R" "$*"; }
 ok()   { printf '%s  ok%s %s\n' "$GR" "$R" "$*"; }
 warn() { printf '%swarn%s %s\n' "$YE" "$R" "$*" >&2; }
@@ -42,7 +42,7 @@ cmd_pull() {
       mkdir -p "$DIR/pip"
       info "downloading wheels for: $*"
       "$pipbin" download "$@" -d "$DIR/pip"
-      ok "cached $(ls -1 "$DIR/pip" | wc -l | tr -d ' ') files in $DIR/pip"
+      ok "cached $(find "$DIR/pip" -type f | wc -l | tr -d ' ') files in $DIR/pip"
       ;;
     apt)
       have apt-get || die "apt-get not found"
@@ -50,7 +50,7 @@ cmd_pull() {
       info "downloading .deb for: $*"
       ( cd "$DIR/apt" && apt-get download "$@" ) \
         || die "apt-get download failed (some packages need 'apt-get install --reinstall -d')"
-      ok "cached $(ls -1 "$DIR/apt"/*.deb 2>/dev/null | wc -l | tr -d ' ') .deb in $DIR/apt"
+      ok "cached $(find "$DIR/apt" -maxdepth 1 -name '*.deb' 2>/dev/null | wc -l | tr -d ' ') .deb in $DIR/apt"
       ;;
     *) die "unknown kind: $kind (pip|apt)" ;;
   esac

@@ -60,11 +60,14 @@ tg_send() {
     warn "Telegram not configured (set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID) — alert not sent"
     return 1
   fi
-  curl -fsS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+  if curl -fsS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
     --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
     --data-urlencode "text=${msg}" \
-    -d "parse_mode=Markdown" >/dev/null 2>&1 \
-    && return 0 || { warn "Telegram send failed"; return 1; }
+    -d "parse_mode=Markdown" >/dev/null 2>&1; then
+    return 0
+  else
+    warn "Telegram send failed"; return 1
+  fi
 }
 
 # ----- per-type probes (echo up|down) ----------------------------------------
@@ -157,7 +160,7 @@ cmd_check() {
     state_set "$name" "$status"
   done < "$TARGETS"
   echo
-  [ "$changed" -gt 0 ] && info "$changed state change(s) — alert(s) dispatched" || info "no state changes"
+  if [ "$changed" -gt 0 ]; then info "$changed state change(s) — alert(s) dispatched"; else info "no state changes"; fi
 }
 
 cmd_watch() {
@@ -180,7 +183,7 @@ cmd_list() {
 
 cmd_test() {
   info "sending a Telegram test message"
-  tg_send "✅ deadman test — your alerts are wired up correctly." && ok "sent" || die "not sent (see warning above)"
+  if tg_send "✅ deadman test — your alerts are wired up correctly."; then ok "sent"; else die "not sent (see warning above)"; fi
 }
 
 case "${1:-}" in

@@ -23,8 +23,7 @@ DRY=0
 
 if [ -t 1 ]; then
   R="$(printf '\033[0m')"; D="$(printf '\033[2m')"; B="$(printf '\033[1m')"
-  CY="$(printf '\033[36m')"; GR="$(printf '\033[32m')"; YE="$(printf '\033[33m')"
-else R=""; D=""; B=""; CY=""; GR=""; YE=""; fi
+else R=""; D=""; B=""; fi
 die() { printf 'fr: %s\n' "$*" >&2; exit 1; }
 
 case "${1:-}" in

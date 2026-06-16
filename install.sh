@@ -13,6 +13,7 @@ RAW_BASE="${DEVTOOLS_RAW_BASE:-https://raw.githubusercontent.com/limack0/limack-
 BIN_DIR="${HOME}/.local/bin"
 # When run from a clone (tools/ sits next to this file) we use local copies;
 # when piped through curl we fetch tool scripts on demand from RAW_BASE.
+# shellcheck disable=SC1007  # 'CDPATH= cd' is an intentional env-prefix, not an assignment
 SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" 2>/dev/null && pwd || true)"
 
 if [ -t 1 ]; then

@@ -47,6 +47,7 @@ cmd_save() {
     echo "date=$(date -u +%FT%TZ)"
     echo "os=$(uname -s)"
     echo "kernel=$(uname -r)"
+    # shellcheck disable=SC1091
     [ -f /etc/os-release ] && . /etc/os-release 2>/dev/null && echo "distro=${PRETTY_NAME:-unknown}"
     echo "shell=${SHELL:-unknown}"
     echo "pm=$pm"
@@ -153,7 +154,7 @@ cmd_restore() {
     run "git config --global '$k' '$v'"
   done
 
-  [ "$apply" -eq 1 ] && ok "restore complete" || info "re-run with --apply to execute"
+  if [ "$apply" -eq 1 ]; then ok "restore complete"; else info "re-run with --apply to execute"; fi
 }
 
 case "${1:-}" in

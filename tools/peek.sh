@@ -18,8 +18,7 @@ SOURCE=""
 if [ -t 1 ]; then
   R="$(printf '\033[0m')"; D="$(printf '\033[2m')"; B="$(printf '\033[1m')"
   RED="$(printf '\033[31m')"; YE="$(printf '\033[33m')"; GR="$(printf '\033[32m')"
-  CY="$(printf '\033[36m')"
-else R=""; D=""; B=""; RED=""; YE=""; GR=""; CY=""; fi
+else R=""; D=""; B=""; RED=""; YE=""; GR=""; fi
 
 die() { printf 'peek: %s\n' "$*" >&2; exit 1; }
 
@@ -60,7 +59,7 @@ FINDINGS=""
 # flag <regex> <weight> <label> : count matches, add to score, remember finding
 flag() {
   pat="$1"; weight="$2"; label="$3"
-  n=$(grep -nE "$pat" "$TMP" 2>/dev/null | wc -l | tr -d ' ')
+  n=$(grep -cE "$pat" "$TMP" 2>/dev/null || true)
   [ "$n" -gt 0 ] || return 0
   SCORE=$((SCORE + weight * n))
   FINDINGS="${FINDINGS}${weight}|${n}|${label}|${pat}
@@ -76,6 +75,7 @@ flag '>[[:space:]]*/etc/|>[[:space:]]*/usr/|>[[:space:]]*/bin/|>[[:space:]]*/lib
 flag 'chmod[[:space:]]+[0-7]*777'                 2 "world-writable permissions (chmod 777)"
 flag 'crontab|systemctl[[:space:]]+enable|launchctl' 3 "installs background services / persistence"
 flag 'of=/dev/sd|of=/dev/nvme|mkfs'               5 "writes to raw disk (can destroy data)"
+# shellcheck disable=SC2088  # ~ is a literal in this grep regex, not a path to expand
 flag '~/\.ssh|id_rsa|\.aws/credentials|\.env'     4 "touches credentials / secrets"
 
 # --- verdict -----------------------------------------------------------------
@@ -88,13 +88,13 @@ printf '  risk score: %s%s%s   verdict: %s\n\n' "$B" "$SCORE" "$R" "$LV"
 
 if [ -n "$FINDINGS" ]; then
   printf '  %sfindings%s\n' "$B" "$R"
-  printf '%s' "$FINDINGS" | while IFS='|' read -r w n label pat; do
+  printf '%s' "$FINDINGS" | while IFS='|' read -r _ n label pat; do
     [ -n "$label" ] || continue
     printf '   %s•%s %s %s(x%s)%s\n' "$YE" "$R" "$label" "$D" "$n" "$R"
   done
   printf '\n  %sdangerous lines%s\n' "$B" "$R"
   # show the actual offending lines with numbers
-  printf '%s' "$FINDINGS" | while IFS='|' read -r w n label pat; do
+  printf '%s' "$FINDINGS" | while IFS='|' read -r _ n label pat; do
     [ -n "$pat" ] || continue
     grep -nE "$pat" "$TMP" 2>/dev/null | head -3 | while IFS= read -r ln; do
       printf '   %s%s%s\n' "$D" "$ln" "$R"

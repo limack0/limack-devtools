@@ -89,7 +89,7 @@ profile_web() {
     if [ "$OFFLINE" -eq 0 ]; then
       info "installing Node via nvm"
       curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | sh
-      # shellcheck disable=SC1090
+      # shellcheck disable=SC1090,SC1091
       . "${HOME}/.nvm/nvm.sh" && nvm install --lts && record "node:nvm-lts"
     else warn "offline: skipping Node (bundle it first)"; fi
   else ok "node already present"; fi

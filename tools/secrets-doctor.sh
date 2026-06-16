@@ -59,8 +59,6 @@ build_grep_excludes() {
   printf '%s' "$ge"
 }
 
-FOUND=0
-
 # one combined ERE of every rule (each pattern preserved, embedded | kept)
 combined_pattern() {
   rules | while IFS='|' read -r name pat; do
