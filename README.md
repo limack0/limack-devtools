@@ -40,7 +40,8 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **wat** | Pipe a command's error in, get a plain-**French** explanation and the exact fix (via OpenRouter). | Stops francophone devs copy-pasting cryptic stack traces into a search box. |
 | **resurrect** | Snapshots this machine's tools/packages/config into a portable manifest; rebuilds it elsewhere. | A **Time Machine for dev boxes** — "my laptop died, give me the same" in one command. |
 | **litemirror** | Turns one machine into a LAN package cache (pip/apt). Download once, install on N machines. | One good link feeds the whole room — built for **slow/metered connections**. |
-| _more coming_ | tunnel, fr, deadmanswitch… | Each one solves an acute pain in one command. |
+| **tunnelforge** | Exposes a local port to the internet in one command via cloudflared. | **No ngrok account, no rate limits.** Quick ephemeral URL, or a stable one on your own domain. |
+| _more coming_ | fr, deadmanswitch, secrets-doctor… | Each one solves an acute pain in one command. |
 
 ### peek — make `curl | sh` safe
 
@@ -105,6 +106,18 @@ On every other machine:
 ```sh
 pip install --no-index --find-links http://<mirror-ip>:8919/pip <pkg>
 ```
+
+### tunnelforge — share localhost, no ngrok
+
+```sh
+tunnelforge 3000                # instant https://<random>.trycloudflare.com
+tunnelforge 3000 demo           # stable https://demo.limackcorp.online (your domain)
+tunnelforge 3000 demo --dry     # show the plan, change nothing
+tunnelforge list                # your named tunnels
+tunnelforge rm demo             # delete one
+```
+
+Quick mode needs nothing. Named mode needs a cloudflared origin cert (`cloudflared tunnel login`). Set your domain with `TUNNELFORGE_DOMAIN`.
 
 ## 🧠 Why a hub
 
