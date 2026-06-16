@@ -1,0 +1,9 @@
+# ShellCheck config for the pack.
+#
+# SC2015 — "A && B || C is not if-then-else". Every occurrence here is the
+# benign idiom `cmd && <printf-wrapper> || <printf-wrapper/true>`, where B is an
+# echo/ok/warn helper (or `true`) that cannot fail in a way that wrongly runs C.
+# The genuine if-then-else cases were already rewritten; what remains is noise,
+# and older shellcheck (0.9, used by CI) flags it as info while 0.11 does not.
+# Disable it repo-wide for a deterministic, version-independent clean run.
+disable=SC2015
