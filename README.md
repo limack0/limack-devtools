@@ -38,7 +38,9 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **peek** | Inspects a remote install script — scores its risk, shows the dangerous lines, asks before running. | The **antidote to `curl \| sh`**. The trust layer the whole pattern is missing. |
 | **sneakersync** | Moves a git repo between machines over a USB key, no shared network — full or delta. | `git bundle` made dead-simple. Built for places where the **network is the unreliable part**. |
 | **wat** | Pipe a command's error in, get a plain-**French** explanation and the exact fix (via OpenRouter). | Stops francophone devs copy-pasting cryptic stack traces into a search box. |
-| _more coming_ | tunnel, litemirror, resurrect… | Each one solves an acute pain in one command. |
+| **resurrect** | Snapshots this machine's tools/packages/config into a portable manifest; rebuilds it elsewhere. | A **Time Machine for dev boxes** — "my laptop died, give me the same" in one command. |
+| **litemirror** | Turns one machine into a LAN package cache (pip/apt). Download once, install on N machines. | One good link feeds the whole room — built for **slow/metered connections**. |
+| _more coming_ | tunnel, fr, deadmanswitch… | Each one solves an acute pain in one command. |
 
 ### peek — make `curl | sh` safe
 
@@ -77,6 +79,32 @@ wat --dry -- ls /nope           # show the request, never calls the API
 ```
 
 Set `OPENROUTER_API_KEY` first. Override the model with `WAT_MODEL`, the language with `WAT_LANG`.
+
+### resurrect — Time Machine for your dev environment
+
+```sh
+resurrect save                  # snapshot this machine -> manifest file
+resurrect show   <file>         # read it back
+resurrect diff   <file>         # what's missing on this machine
+resurrect restore <file>        # plan the rebuild (dry)
+resurrect restore <file> --apply   # actually reinstall
+```
+
+Captures tool versions, manually-installed packages (apt/brew/dnf/pacman), uv/pipx/npm globals, and git config.
+
+### litemirror — one machine feeds the LAN
+
+```sh
+litemirror pull pip requests flask    # cache wheels once, on the connected box
+litemirror pull apt build-essential   # cache .deb
+litemirror serve                      # serve the cache over the LAN
+litemirror client                     # print what other machines should set
+```
+
+On every other machine:
+```sh
+pip install --no-index --find-links http://<mirror-ip>:8919/pip <pkg>
+```
 
 ## 🧠 Why a hub
 

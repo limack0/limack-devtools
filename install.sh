@@ -31,6 +31,8 @@ devbox|devbox|setup a dev machine (git/node/python/docker)|tools/devbox.sh
 peek|peek|inspect remote install scripts before you run them|tools/peek.sh
 sneakersync|sneakersync|move a git repo between machines over USB, no network|tools/sneakersync.sh
 wat|wat|explain a command error in plain French (AI)|tools/wat.sh
+resurrect|resurrect|snapshot and rebuild your dev environment anywhere|tools/resurrect.sh
+litemirror|litemirror|turn one machine into a LAN package cache|tools/litemirror.sh
 "
 
 tool_field() { # id field-index  -> prints the field
