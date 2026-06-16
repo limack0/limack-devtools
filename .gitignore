@@ -1,0 +1,8 @@
+# local state produced by the tools at runtime
+.devbox-init/
+*.bundle
+.sneakersync-manifest
+
+# editor / OS noise
+.DS_Store
+*.swp
