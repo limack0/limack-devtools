@@ -45,7 +45,7 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **secrets-doctor** | Scans files for leaked API keys, tokens and private keys; gates commits via a pre-commit hook. | **100% local — nothing is uploaded.** Redacts findings, exits non-zero so it works in CI and hooks. |
 | **fr** | Ask any dev question in French; get a concise answer tuned for the francophone / West-African context. | A terminal assistant in **your** language — stop translating questions into English first. |
 | **oneshot** | Turns a fresh VPS into an app host: Docker + a Caddy auto-HTTPS reverse proxy + one-line app deploys. | Bring a domain, get a live HTTPS site. `--dry` previews every step. |
-| _more coming_ | landrop-ai… | Each one solves an acute pain in one command. |
+| **landrop** | Shares one machine's local AI model (Ollama) across the LAN so everyone queries it. | **Offline AI** — the strong box in the room serves the rest. No cloud, no per-seat downloads. |
 
 ### peek — make `curl | sh` safe
 
@@ -177,6 +177,24 @@ Routing and TLS are automatic: apps run on the `oneshot` network with `caddy`
 labels, and [caddy-docker-proxy](https://github.com/lucaslorentz/caddy-docker-proxy)
 fetches Let's Encrypt certs for each domain once DNS points at the server. Add
 `--dry` to any command to preview without changing anything. `init`/`host` need root.
+
+### landrop — offline AI for the whole LAN
+
+```sh
+# on the strongest machine (needs Ollama: curl -fsSL https://ollama.com/install.sh | sh)
+landrop serve --model llama3.2:1b      # host the model on the LAN
+landrop client                          # prints what others should set
+
+# on every other machine
+export LANDROP_HOST=http://<server-ip>:11434
+landrop ask "explique les pointeurs en C"
+cat erreur.log | landrop ask "c'est quoi ce crash ?"
+```
+
+Built on [Ollama](https://ollama.com): one box runs the model, the rest query it
+over the LAN — no cloud, no per-machine downloads. Pick a small model
+(`qwen2.5:0.5b`, `llama3.2:1b`) for low-RAM hosts. `landrop ask --dry` shows the
+request without calling the server.
 
 ## 🧠 Why a hub
 
