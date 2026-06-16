@@ -1,0 +1,8 @@
+tunnel: 491cba67-5a27-4a09-afb2-d848da239d40
+credentials-file: /etc/cloudflared/creds.json
+protocol: http2
+
+ingress:
+  - hostname: get.limackcorp.online
+    service: http://web:80
+  - service: http_status:404

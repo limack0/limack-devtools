@@ -3,6 +3,9 @@
 *.bundle
 .sneakersync-manifest
 
+# tunnel credentials — secret, never commit
+deploy/cloudflared/creds.json
+
 # editor / OS noise
 .DS_Store
 *.swp
