@@ -35,6 +35,7 @@ resurrect|resurrect|snapshot and rebuild your dev environment anywhere|tools/res
 litemirror|litemirror|turn one machine into a LAN package cache|tools/litemirror.sh
 tunnelforge|tunnelforge|expose a local port to the internet in one command|tools/tunnelforge.sh
 deadman|deadman|monitor services + heartbeats, alert on Telegram when they die|tools/deadmanswitch.sh
+secrets-doctor|secrets-doctor|find leaked secrets locally before they ship|tools/secrets-doctor.sh
 "
 
 tool_field() { # id field-index  -> prints the field

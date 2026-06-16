@@ -42,7 +42,8 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **litemirror** | Turns one machine into a LAN package cache (pip/apt). Download once, install on N machines. | One good link feeds the whole room — built for **slow/metered connections**. |
 | **tunnelforge** | Exposes a local port to the internet in one command via cloudflared. | **No ngrok account, no rate limits.** Quick ephemeral URL, or a stable one on your own domain. |
 | **deadman** | Monitors services (http/tcp/command) and heartbeats; pings you on **Telegram** when something dies or recovers. | Personal uptime + dead-man's switch in one command. Alerts only on **state changes** — no spam. |
-| _more coming_ | fr, secrets-doctor, oneshot-vps… | Each one solves an acute pain in one command. |
+| **secrets-doctor** | Scans files for leaked API keys, tokens and private keys; gates commits via a pre-commit hook. | **100% local — nothing is uploaded.** Redacts findings, exits non-zero so it works in CI and hooks. |
+| _more coming_ | fr, oneshot-vps, landrop-ai… | Each one solves an acute pain in one command. |
 
 ### peek — make `curl | sh` safe
 
@@ -135,6 +136,19 @@ deadman watch --interval 60                      # or loop in the foreground
 Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. It alerts only when a target's
 state **changes** (up→down or down→up). `DEADMAN_DRY=1` prints alerts instead of
 sending them. Typical use: `*/5 * * * * deadman check` in cron.
+
+### secrets-doctor — catch leaked secrets locally
+
+```sh
+secrets-doctor scan [path]      # scan a dir/file (default .)
+secrets-doctor staged           # scan only git-staged files
+secrets-doctor install-hook     # pre-commit hook that blocks leaking secrets
+```
+
+Detects AWS/GitHub/Slack/Google/OpenAI/Stripe/Telegram keys, JWTs, private-key
+blocks and generic `secret=...` assignments. Findings are **redacted** (first
+4 chars only) and obvious placeholders are skipped. Nothing ever leaves the
+machine. Exit code is non-zero on findings, so CI and pre-commit hooks can gate on it.
 
 ## 🧠 Why a hub
 
