@@ -43,6 +43,7 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **tunnelforge** | Exposes a local port to the internet in one command via cloudflared. | **No ngrok account, no rate limits.** Quick ephemeral URL, or a stable one on your own domain. |
 | **deadman** | Monitors services (http/tcp/command) and heartbeats; pings you on **Telegram** when something dies or recovers. | Personal uptime + dead-man's switch in one command. Alerts only on **state changes** — no spam. |
 | **secrets-doctor** | Scans files for leaked API keys, tokens and private keys; gates commits via a pre-commit hook. | **100% local — nothing is uploaded.** Redacts findings, exits non-zero so it works in CI and hooks. |
+| **relay** | Run any command through it: offline, it's queued and sent automatically when the network returns. | Makes **intermittent connectivity a non-event** — you keep working, it syncs when it can. |
 | **fr** | Ask any dev question in French; get a concise answer tuned for the francophone / West-African context. | A terminal assistant in **your** language — stop translating questions into English first. |
 | **oneshot** | Turns a fresh VPS into an app host: Docker + a Caddy auto-HTTPS reverse proxy + one-line app deploys. | Bring a domain, get a live HTTPS site. `--dry` previews every step. |
 | **landrop** | Shares one machine's local AI model (Ollama) across the LAN so everyone queries it. | **Offline AI** — the strong box in the room serves the rest. No cloud, no per-seat downloads. |
@@ -151,6 +152,22 @@ Detects AWS/GitHub/Slack/Google/OpenAI/Stripe/Telegram keys, JWTs, private-key
 blocks and generic `secret=...` assignments. Findings are **redacted** (first
 4 chars only) and obvious placeholders are skipped. Nothing ever leaves the
 machine. Exit code is non-zero on findings, so CI and pre-commit hooks can gate on it.
+
+### relay — connectivity that's *eventual*, not binary
+
+```sh
+relay git push                 # online? runs now. offline? queued.
+relay -- curl -X POST api/deploy
+relay status                   # network state + what's waiting
+relay flush                    # send the queue now
+relay daemon                   # auto-send whenever the network returns
+```
+
+Most tools error out the moment the network blinks. relay queues the command
+instead and sends it automatically once you're back online — in order, with
+dedupe. Commands that fail for a *non-network* reason are parked in `failed/`
+so a broken one never blocks the queue. Optional Telegram pings when jobs send
+(`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`). Built for connections that drop.
 
 ### fr — your francophone dev assistant
 

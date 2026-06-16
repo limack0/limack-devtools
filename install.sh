@@ -37,6 +37,7 @@ litemirror|litemirror|turn one machine into a LAN package cache|tools/litemirror
 tunnelforge|tunnelforge|expose a local port to the internet in one command|tools/tunnelforge.sh
 deadman|deadman|monitor services + heartbeats, alert on Telegram when they die|tools/deadmanswitch.sh
 secrets-doctor|secrets-doctor|find leaked secrets locally before they ship|tools/secrets-doctor.sh
+relay|relay|queue commands offline, send them when the network returns|tools/relay.sh
 fr|fr|francophone dev assistant in your terminal (AI)|tools/fr.sh
 oneshot|oneshot|turn a fresh VPS into an app host in one command|tools/oneshot.sh
 landrop|landrop|share one machine's AI model across the LAN (offline AI)|tools/landrop.sh
