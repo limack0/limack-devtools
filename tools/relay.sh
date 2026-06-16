@@ -44,23 +44,39 @@ notify() { # optional Telegram ping; no-op if unconfigured
     >/dev/null 2>&1 || true
 }
 
-# a job file: line 1 = cwd, lines 2.. = argv (one arg per line, exact)
+# a job file: line 1 = dedup key (may be empty), line 2 = cwd,
+# lines 3.. = argv (one arg per line, exact).
+payload() { pwd; for a in "$@"; do printf '%s\n' "$a"; done }  # cwd + argv
+
+# KEY is set by the caller (relay_run). Dedup before writing:
+#  - with a key: a new job supersedes any queued job sharing that key (latest wins)
+#  - without a key: an identical command (same cwd+argv) is not queued twice
 enqueue() {
   mkdir -p "$QDIR"
+  sig="$(payload "$@" | cksum | cut -d' ' -f1)"
+  for ex in "$QDIR"/*; do      # glob (not find): safe with spaces, no subshell
+    [ -f "$ex" ] || continue
+    if [ -n "$KEY" ] && [ "$(head -n1 "$ex")" = "$KEY" ]; then
+      rm -f "$ex"; info "superseded previous '${KEY}' job"
+    elif [ -z "$KEY" ] && [ "$(tail -n +2 "$ex" | cksum | cut -d' ' -f1)" = "$sig" ]; then
+      info "identical job already queued — not duplicated"; return 0
+    fi
+  done
   ts="$(date +%s%N 2>/dev/null || date +%s)"
-  job="$QDIR/${ts}-$$"
-  { pwd; for a in "$@"; do printf '%s\n' "$a"; done } > "$job"
+  { printf '%s\n' "$KEY"; payload "$@"; } > "$QDIR/${ts}-$$"
 }
 
-job_desc() { # human-readable command from a job file (skip the cwd line)
-  awk 'NR>1{ if(s)s=s" "; s=s $0 } END{print s}' "$1"
+job_desc() { # human-readable command (skip the key + cwd lines)
+  awk 'NR>2{ if(s)s=s" "; s=s $0 } END{print s}' "$1"
 }
 
 run_job() { # reconstruct argv from the job file and execute in its cwd
   jf="$1"; cwd=""; set --; n=0
   while IFS= read -r line; do
     n=$((n+1))
-    if [ "$n" -eq 1 ]; then cwd="$line"; else set -- "$@" "$line"; fi
+    if [ "$n" -eq 1 ]; then :                       # key — ignore at run time
+    elif [ "$n" -eq 2 ]; then cwd="$line"
+    else set -- "$@" "$line"; fi
   done < "$jf"
   [ "$#" -gt 0 ] || return 0
   ( cd "$cwd" 2>/dev/null || cd / ; "$@" )
@@ -68,9 +84,16 @@ run_job() { # reconstruct argv from the job file and execute in its cwd
 
 # ----- run-or-queue ----------------------------------------------------------
 relay_run() {
-  force=0
-  [ "${1:-}" = "--queue" ] && { force=1; shift; }
-  [ "${1:-}" = "--" ] && shift
+  force=0; KEY=""
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --queue)  force=1; shift ;;
+      --key)    KEY="${2:-}"; shift 2 ;;
+      --key=*)  KEY="${1#--key=}"; shift ;;
+      --)       shift; break ;;
+      *)        break ;;
+    esac
+  done
   [ "$#" -gt 0 ] || die "nothing to run (relay <command>)"
 
   if [ "$force" -eq 0 ] && is_online; then
@@ -146,6 +169,7 @@ case "${1:-}" in
     printf 'relay — queue commands offline, send them when the network returns.\n\n'
     printf '  relay <command>        run now if online, else queue it\n'
     printf '  relay --queue <cmd>    always queue (batch for later)\n'
+    printf '  relay --key NAME <cmd> queue under a key: a newer one supersedes it\n'
     printf '  relay status           network + what is waiting\n'
     printf '  relay flush            try to send the queue now\n'
     printf '  relay daemon [--interval N]   auto-flush when online\n'

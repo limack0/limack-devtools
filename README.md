@@ -156,18 +156,22 @@ machine. Exit code is non-zero on findings, so CI and pre-commit hooks can gate 
 ### relay — connectivity that's *eventual*, not binary
 
 ```sh
-relay git push                 # online? runs now. offline? queued.
+relay git push                    # online? runs now. offline? queued.
 relay -- curl -X POST api/deploy
-relay status                   # network state + what's waiting
-relay flush                    # send the queue now
-relay daemon                   # auto-send whenever the network returns
+relay --key deploy ./deploy.sh    # keyed: a newer 'deploy' supersedes the queued one
+relay status                      # network state + what's waiting
+relay flush                       # send the queue now
+relay daemon                      # auto-send whenever the network returns
 ```
 
 Most tools error out the moment the network blinks. relay queues the command
-instead and sends it automatically once you're back online — in order, with
-dedupe. Commands that fail for a *non-network* reason are parked in `failed/`
-so a broken one never blocks the queue. Optional Telegram pings when jobs send
-(`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`). Built for connections that drop.
+instead and sends it automatically once you're back online — in order. It
+**dedupes** intelligently: an identical command queued twice is only sent once,
+and with `--key NAME` a newer job supersedes an older one sharing that key (so
+only the latest `deploy` runs, not every one you queued). Commands that fail for
+a *non-network* reason are parked in `failed/` so a broken one never blocks the
+queue. Optional Telegram pings when jobs send (`TELEGRAM_BOT_TOKEN` +
+`TELEGRAM_CHAT_ID`). Built for connections that drop.
 
 ### fr — your francophone dev assistant
 
