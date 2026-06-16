@@ -61,26 +61,42 @@ build_grep_excludes() {
 
 FOUND=0
 
-# scan a single path (dir or file) against all rules
-scan_path() {
-  target="$1"
-  ge="$(build_grep_excludes)"
+# one combined ERE of every rule (each pattern preserved, embedded | kept)
+combined_pattern() {
+  rules | while IFS='|' read -r name pat; do
+    [ -n "$pat" ] && printf '(%s)|' "$pat"
+  done | sed 's/|$//'
+}
+
+# analyse a single FILE against each rule (cheap: only called on candidates)
+scan_file() {
+  file="$1"
   rules | while IFS='|' read -r name pat; do
     [ -n "$name" ] || continue
-    # -r recurse, -n line numbers, -I skip binaries, -H always show filename
-    # (-H matters when scanning a single file), -E extended regex
-    # shellcheck disable=SC2086
-    grep -rnIHE $ge -e "$pat" "$target" 2>/dev/null | while IFS= read -r hit; do
-      file="${hit%%:*}"; rest="${hit#*:}"; lineno="${rest%%:*}"; content="${rest#*:}"
+    grep -nIHE -e "$pat" "$file" 2>/dev/null | while IFS= read -r hit; do
+      f="${hit%%:*}"; rest="${hit#*:}"; lineno="${rest%%:*}"; content="${rest#*:}"
       token="$(printf '%s' "$content" | grep -oE -e "$pat" | head -1)"
       [ -n "$token" ] || continue
       is_placeholder "$content" && continue
       printf '%s●%s %s%s%s:%s%s%s  %s[%s]%s  %s\n' \
-        "$RED" "$R" "$B" "$file" "$R" "$YE" "$lineno" "$R" \
+        "$RED" "$R" "$B" "$f" "$R" "$YE" "$lineno" "$R" \
         "$D" "$name" "$R" "$(mask "$token")"
-      # signal a find via a marker file (subshell can't set parent vars)
-      echo x >> "$MARK"
+      echo x >> "$MARK"   # subshell can't set parent vars; signal via marker file
     done
+  done
+}
+
+# scan a path (dir or file): walk the tree ONCE to find candidate files with the
+# combined pattern, then run the per-rule analysis only on those files.
+scan_path() {
+  target="$1"
+  ge="$(build_grep_excludes)"
+  combined="$(combined_pattern)"
+  # shellcheck disable=SC2086
+  candidates="$(grep -rlIE $ge -e "$combined" "$target" 2>/dev/null || true)"
+  [ -n "$candidates" ] || return 0
+  printf '%s\n' "$candidates" | while IFS= read -r file; do
+    [ -n "$file" ] && scan_file "$file"
   done
 }
 

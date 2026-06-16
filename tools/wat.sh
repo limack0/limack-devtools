@@ -45,7 +45,8 @@ if [ "$RUN_MODE" -eq 1 ]; then
   CODE=$?
   printf '%s\n' "$OUT" >&2
   CONTEXT="$(printf 'Command: %s\nExit code: %s\nOutput:\n%s' "$*" "$CODE" "$OUT")"
-elif [ ! -t 0 ]; then
+elif [ -p /dev/stdin ] || [ -f /dev/stdin ]; then
+  # only read on a real pipe/redirect so wat never blocks on an inherited stdin
   CONTEXT="$(cat)"
 else
   die "no input — pipe an error in, or use: wat -- <command>"
