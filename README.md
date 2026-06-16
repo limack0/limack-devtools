@@ -41,7 +41,8 @@ curl -fsSL get.limackcorp.online | sh -s -- run devbox --profile=web --silent
 | **resurrect** | Snapshots this machine's tools/packages/config into a portable manifest; rebuilds it elsewhere. | A **Time Machine for dev boxes** — "my laptop died, give me the same" in one command. |
 | **litemirror** | Turns one machine into a LAN package cache (pip/apt). Download once, install on N machines. | One good link feeds the whole room — built for **slow/metered connections**. |
 | **tunnelforge** | Exposes a local port to the internet in one command via cloudflared. | **No ngrok account, no rate limits.** Quick ephemeral URL, or a stable one on your own domain. |
-| _more coming_ | fr, deadmanswitch, secrets-doctor… | Each one solves an acute pain in one command. |
+| **deadman** | Monitors services (http/tcp/command) and heartbeats; pings you on **Telegram** when something dies or recovers. | Personal uptime + dead-man's switch in one command. Alerts only on **state changes** — no spam. |
+| _more coming_ | fr, secrets-doctor, oneshot-vps… | Each one solves an acute pain in one command. |
 
 ### peek — make `curl | sh` safe
 
@@ -118,6 +119,22 @@ tunnelforge rm demo             # delete one
 ```
 
 Quick mode needs nothing. Named mode needs a cloudflared origin cert (`cloudflared tunnel login`). Set your domain with `TUNNELFORGE_DOMAIN`.
+
+### deadman — uptime + dead-man's switch, alerts on Telegram
+
+```sh
+deadman add api https://api.example.com         # http check
+deadman add db  db.example.com:5432             # tcp check
+deadman add disk --cmd 'df / | awk "NR==2 && \$5+0>90{exit 1}"'
+deadman add nightly-backup --beat 90000         # must check in within 25h
+deadman beat  nightly-backup                    # ...call this from the cron job
+deadman check                                    # run once (cron this every N min)
+deadman watch --interval 60                      # or loop in the foreground
+```
+
+Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. It alerts only when a target's
+state **changes** (up→down or down→up). `DEADMAN_DRY=1` prints alerts instead of
+sending them. Typical use: `*/5 * * * * deadman check` in cron.
 
 ## 🧠 Why a hub
 

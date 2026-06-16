@@ -34,6 +34,7 @@ wat|wat|explain a command error in plain French (AI)|tools/wat.sh
 resurrect|resurrect|snapshot and rebuild your dev environment anywhere|tools/resurrect.sh
 litemirror|litemirror|turn one machine into a LAN package cache|tools/litemirror.sh
 tunnelforge|tunnelforge|expose a local port to the internet in one command|tools/tunnelforge.sh
+deadman|deadman|monitor services + heartbeats, alert on Telegram when they die|tools/deadmanswitch.sh
 "
 
 tool_field() { # id field-index  -> prints the field
